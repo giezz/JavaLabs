@@ -1,9 +1,10 @@
 CREATE TABLE student
 (
     id     SERIAL PRIMARY KEY,
-    name   TEXT           NOT NULL,
-    series INTEGER UNIQUE NOT NULL,
-    number INTEGER UNIQUE NOT NULL
+    name   TEXT    NOT NULL,
+    series INTEGER NOT NULL,
+    number INTEGER NOT NULL,
+    UNIQUE (series, number)
 );
 
 CREATE TABLE subject
@@ -24,18 +25,24 @@ CREATE TABLE progress
             ON DELETE CASCADE
             ON UPDATE CASCADE,
     mark       INTEGER
-        CONSTRAINT valid_mark CHECK ( mark BETWEEN 2 AND 5)
+        CONSTRAINT valid_mark CHECK ( mark BETWEEN 2 AND 5 )
 );
+
 DROP TABLE student CASCADE;
 DROP TABLE progress;
 DROP TABLE subject;
 
+
+
 TRUNCATE progress;
+
+
 
 SELECT stud.name, subj.name, p.mark
 FROM student AS stud
          JOIN progress AS p ON stud.id = p.student_id
          JOIN subject AS subj ON p.subject_id = subj.id;
+
 
 --Вывести список студентов, сдавших определенный предмет, на оценку выше 3;
 SELECT stud.name, subj.name, p.mark
@@ -45,9 +52,12 @@ FROM student AS stud
 WHERE p.mark >= 3
   AND p.subject_id = 3;
 
+
+
 DELETE
 FROM student
 WHERE id = 2;
+
 
 --Посчитать средний бал по определенному предмету
 SELECT subject.name, AVG(progress.mark)
@@ -55,12 +65,14 @@ FROM progress
          JOIN subject ON progress.subject_id = subject.id
 GROUP BY subject.name;
 
+
 --Посчитать средний балл по определенному студенту;
 SELECT student.name, AVG(progress.mark)
 FROM progress
          JOIN subject ON progress.subject_id = subject.id
          JOIN student ON student.id = progress.student_id
 GROUP BY student.name;
+
 
 --Найти три премета, которые сдали наибольшее количество студентов;
 SELECT subj.name
@@ -71,16 +83,44 @@ WHERE (SELECT AVG(mark)
                 JOIN subject ON subj.id = progress.subject_id) >= 3
 GROUP BY subj.name;
 
-INSERT INTO student
-VALUES (DEFAULT, 'Misha', 123, 123);
-INSERT INTO student
-VALUES (DEFAULT, 'Vova', 124, 124);
-INSERT INTO student
-VALUES (DEFAULT, 'Nikita', 125, 125);
-INSERT INTO student
-VALUES (DEFAULT, 'Andrey', 126, 126);
-INSERT INTO student
-VALUES (DEFAULT, 'Valera', 127, 127);
+
+
+UPDATE student
+set name = 'Artyem'
+WHERE id = 5;
+
+
+--вывести всех отличников по математике
+SELECT stud.name, subj.name, p.mark
+FROM student AS stud
+         JOIN progress AS p ON stud.id = p.student_id
+         JOIN subject AS subj ON p.subject_id = subj.id
+WHERE p.mark = 5 AND subj.id = 3 ORDER BY stud.name;
+
+
+
+
+INSERT INTO student (name, series, number)
+VALUES ('Misha', 123, 123);
+INSERT INTO student (name, series, number)
+VALUES ('Vova', 123, 124);
+INSERT INTO student (name, series, number)
+VALUES ('Nikita', 123, 125);
+INSERT INTO student (name, series, number)
+VALUES ('Andrey', 126, 126);
+INSERT INTO student (name, series, number)
+VALUES ('Valera', 127, 127);
+
+INSERT INTO student (name, series, number)
+VALUES ('Dima', 123, 128);
+INSERT INTO student (name, series, number)
+VALUES ('Bogdan', 123, 129);
+INSERT INTO student (name, series, number)
+VALUES ('Masksin', 126, 130);
+INSERT INTO student (name, series, number)
+VALUES ('Zakhar', 127, 131);
+
+UPDATE progress SET mark = 5 WHERE student_id = 4;
 
 INSERT INTO subject
 VALUES (DEFAULT, 'Технологии программирования');
@@ -124,3 +164,12 @@ INSERT INTO progress
 VALUES (DEFAULT, 4, 3, 2);
 INSERT INTO progress
 VALUES (DEFAULT, 5, 3, 2);
+
+INSERT INTO progress
+VALUES (DEFAULT, 6, 3, 5);
+INSERT INTO progress
+VALUES (DEFAULT, 7, 3, 5);
+INSERT INTO progress
+VALUES (DEFAULT, 8, 3, 5);
+INSERT INTO progress
+VALUES (DEFAULT, 9, 3, 5);
